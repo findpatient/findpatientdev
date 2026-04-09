@@ -1,0 +1,81 @@
+<!doctype html> 
+<html>
+  <head>
+    <title id="dynamicTitle">Loading…</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- NHS HEADER -->
+    <div id="nhsHeader">
+      <div id="nhsHeaderLeft">
+        <img src="https://assets.nhs.uk/images/nhs-logo.png" alt="NHS Logo" />
+      </div>
+
+      <div id="nhsHeaderCenter" class="appTitle">Loading…</div>
+
+      <div id="nhsHeaderRight">
+        <div id="toolsButton" class="menuButton dropdownTrigger">
+          <span id="activeToolLabel">Loading…</span>
+          <div id="toolsMenu" class="dropdownMenu dropdownList"></div>
+        </div>
+
+        <div id="timestamp"></div>
+      </div>
+    </div>
+
+    <div id="mobileHeaderTitle" class="appTitle">Loading…</div>
+
+    <!-- DESKTOP VERSION -->
+    <div id="desktopContainer">
+      <div id="selectorBar">
+        <div id="hospitalButton" class="selectorButton dropdownTrigger">
+          <svg width="16" height="16" fill="#003087" viewBox="0 0 24 24">
+            <path
+              d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"
+            />
+          </svg>
+          <span id="activeHospital">Loading…</span>
+          <div id="hospitalMenu" class="dropdownMenu dropdownList"></div>
+        </div>
+
+        <div id="locationButton" class="selectorButton dropdownTrigger">
+          <span id="activeLocation">Loading…</span>
+          <div id="locationMenu" class="dropdownMenu dropdownList"></div>
+        </div>
+      </div>
+
+      <div id="loadingSpinner">Loading…</div>
+
+      <div id="pageContent">
+        <iframe id="dashboardFrame" src=""></iframe>
+      </div>
+    </div>
+
+    <!-- MOBILE VERSION -->
+    <div id="mobileContainer">
+      <div id="mobileMenu"></div>
+      <div id="hospitalSelector" style="display: none"></div>
+    </div>
+
+    <footer id="appFooter">
+      <div id="footerLeft">
+        <span id="appVersion"></span>
+      </div>
+
+      <div id="footerRight">
+        <span class="footerBrand">findpatient</span>
+        <span class="footerDivider">|</span>
+        <span class="footerCopy">© 2026</span>
+        <span class="footerName" id="footerAuthor"></span>
+      </div>
+    </footer>
+
+    <!-- CONFIG FIRST -->
+    <script src="config.js"></script>
+
+    <!-- MAIN SCRIPT -->
+    <script src="script.js?v=999"></script>
+  </body>
+</html>
