@@ -1,61 +1,147 @@
 /* =========================================================
-   FINDPATIENT — CLEAN, CONFIG‑DRIVEN REWRITE
+   FINDPATIENT — CLEAN, CONFIG‑DRIVEN (SITES VERSION)
    ========================================================= */
 
 /* ------------------------------
-   0. CONFIG REFERENCE
+   0. CONFIG + STATE
    ------------------------------ */
 
 const cfg = window.findpatientConfig;
 
-/* ------------------------------
-   1. DOM REFERENCES
-   ------------------------------ */
-
-const desktopContainer = document.getElementById("desktopContainer");
-const mobileContainer = document.getElementById("mobileContainer");
-
-const toolsButton = document.getElementById("toolsButton");
-const toolsMenu = document.getElementById("toolsMenu");
-const activeToolLabel = document.getElementById("activeToolLabel");
-
-const hospitalButton = document.getElementById("hospitalButton");
-const hospitalMenu = document.getElementById("hospitalMenu");
-const activeHospital = document.getElementById("activeHospital");
-
-const locationButton = document.getElementById("locationButton");
-const locationMenu = document.getElementById("locationMenu");
-const activeLocation = document.getElementById("activeLocation");
-
-const timestamp = document.getElementById("timestamp");
-const loadingSpinner = document.getElementById("loadingSpinner");
-const iframe = document.getElementById("dashboardFrame");
-const selectorBar = document.getElementById("selectorBar");
-
-const footerAuthor = document.getElementById("footerAuthor");
-const appVersion = document.getElementById("appVersion");
-
-/* ------------------------------
-   2. STATE
-   ------------------------------ */
-
-let currentHospitalKey = null;
+let currentSiteKey = null;
 let currentLocationName = null;
 let currentToolKey = "tracking";
 
+const dom = {
+  desktopContainer: null,
+  mobileContainer: null,
+
+  toolsButton: null,
+  toolsMenu: null,
+  activeToolLabel: null,
+
+  siteButton: null,
+  siteMenu: null,
+  activeSite: null,
+
+  locationButton: null,
+  locationMenu: null,
+  activeLocation: null,
+
+  timestamp: null,
+  loadingSpinner: null,
+  iframe: null,
+  selectorRow: null,
+
+  footerAuthor: null,
+  appVersion: null,
+
+  appLogo: null,
+  appLogoFallback: null,
+  dynamicFavicon: null,
+  dynamicTitle: null
+};
+
 /* ------------------------------
-   3. INITIALISE APP TITLE + VERSION
+   1. DOM BINDING
    ------------------------------ */
 
-document.getElementById("dynamicTitle").textContent = cfg.trust.appTitle;
-document.querySelectorAll(".appTitle").forEach(el => {
-  el.textContent = cfg.trust.appTitle;
-});
+function bindDom() {
+  dom.desktopContainer =
+    document.getElementById("desktopContainer") ||
+    document.getElementById("mainContent");
+  dom.mobileContainer = document.getElementById("mobileContainer");
 
-appVersion.textContent = `${cfg.trust.code} ${cfg.trust.version}`;
+  dom.toolsButton = document.getElementById("toolsButton");
+  dom.toolsMenu = document.getElementById("toolsMenu");
+  dom.activeToolLabel = document.getElementById("activeToolLabel");
+
+  dom.siteButton = document.getElementById("siteButton");
+  dom.siteMenu = document.getElementById("siteMenu");
+  dom.activeSite = document.getElementById("activeSite");
+
+  dom.locationButton = document.getElementById("locationButton");
+  dom.locationMenu = document.getElementById("locationMenu");
+  dom.activeLocation = document.getElementById("activeLocation");
+
+  dom.timestamp = document.getElementById("timestamp");
+  dom.loadingSpinner = document.getElementById("loadingSpinner");
+  dom.iframe = document.getElementById("dashboardFrame");
+  dom.selectorRow = document.getElementById("selectorRow");
+
+  dom.footerAuthor = document.getElementById("footerAuthor");
+  dom.appVersion = document.getElementById("appVersion");
+
+  dom.appLogo = document.getElementById("appLogo");
+  dom.appLogoFallback = document.getElementById("appLogoFallback");
+  dom.dynamicFavicon = document.getElementById("dynamicFavicon");
+  dom.dynamicTitle = document.getElementById("dynamicTitle");
+}
 
 /* ------------------------------
-   4. MOBILE DETECTION
+   2. BRANDING + ORG METADATA
+   ------------------------------ */
+
+function applyBranding() {
+  if (!cfg || !cfg.branding) return;
+
+  const mode = cfg.branding.brandingMode;
+  const themes = cfg.branding.themes || {};
+  const theme = themes[mode];
+  if (!theme) return;
+
+  document.querySelectorAll(".appTitle").forEach(el => {
+    el.textContent = theme.appName;
+  });
+  if (dom.dynamicTitle) dom.dynamicTitle.textContent = theme.appName;
+
+  if (theme.logo && dom.appLogo && dom.appLogoFallback) {
+    dom.appLogo.src = theme.logo;
+
+    dom.appLogo.onload = () => {
+      dom.appLogo.style.display = "block";
+      dom.appLogoFallback.style.display = "none";
+    };
+
+    dom.appLogo.onerror = () => {
+      dom.appLogo.style.display = "none";
+      dom.appLogoFallback.style.display = "block";
+      dom.appLogoFallback.textContent = theme.appName || cfg.org.code;
+      dom.appLogoFallback.style.color = theme.background;
+    };
+  } else if (dom.appLogo && dom.appLogoFallback) {
+    dom.appLogo.style.display = "none";
+    dom.appLogoFallback.style.display = "block";
+    dom.appLogoFallback.textContent = theme.appName || cfg.org.code;
+  }
+
+  if (theme.favicon && dom.dynamicFavicon) {
+    dom.dynamicFavicon.href = theme.favicon;
+  }
+
+  const root = document.documentElement;
+  root.style.setProperty("--primary-colour", theme.primary);
+  root.style.setProperty("--secondary-colour", theme.secondary);
+  root.style.setProperty("--accent-colour", theme.accent);
+  root.style.setProperty("--background-colour", theme.background);
+  root.style.setProperty("--danger-colour", theme.danger);
+  root.style.setProperty("--success-colour", theme.success);
+}
+
+function applyOrgMetadata() {
+  if (!cfg || !cfg.org) return;
+
+  if (dom.dynamicTitle) dom.dynamicTitle.textContent = cfg.org.appTitle;
+  document.querySelectorAll(".appTitle").forEach(el => {
+    el.textContent = cfg.org.appTitle;
+  });
+
+  if (dom.appVersion) dom.appVersion.textContent = `${cfg.org.code} ${cfg.org.version}`;
+  if (dom.footerAuthor) dom.footerAuthor.textContent = cfg.org.name;
+}
+
+/* ------------------------------
+   3. MOBILE MODE
    ------------------------------ */
 
 function detectMobileMode() {
@@ -65,29 +151,29 @@ function detectMobileMode() {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 
-window.addEventListener("load", () => {
+function applyMobileMode() {
   const mobile = detectMobileMode();
 
   if (mobile) {
-    desktopContainer.style.display = "none";
-    mobileContainer.style.display = "block";
-
-    timestamp.style.display = "none";
+    if (dom.desktopContainer) dom.desktopContainer.style.display = "none";
+    if (dom.mobileContainer) dom.mobileContainer.style.display = "block";
+    if (dom.timestamp) dom.timestamp.style.display = "none";
 
     buildMobileMenu();
-    buildMobileHospitalSelector();
+    buildMobileSiteSelector();
   } else {
-    desktopContainer.style.display = "block";
-    mobileContainer.style.display = "none";
+    if (dom.desktopContainer) dom.desktopContainer.style.display = "block";
+    if (dom.mobileContainer) dom.mobileContainer.style.display = "none";
   }
-});
+}
 
 /* ------------------------------
-   5. BUILD TOOLS MENU
+   4. TOOLS MENU
    ------------------------------ */
 
 function buildToolsMenu() {
-  toolsMenu.innerHTML = "";
+  if (!dom.toolsMenu || !cfg || !cfg.tools) return;
+  dom.toolsMenu.innerHTML = "";
 
   cfg.tools.forEach(tool => {
     if (!tool.enabled) return;
@@ -104,40 +190,37 @@ function buildToolsMenu() {
       }
     };
 
-    toolsMenu.appendChild(item);
+    dom.toolsMenu.appendChild(item);
   });
 }
 
-
 /* ------------------------------
-   6. BUILD HOSPITAL MENU
+   5. SITES + LOCATIONS
    ------------------------------ */
 
-function buildHospitalMenu() {
-  hospitalMenu.innerHTML = "";
+function buildSiteMenu() {
+  if (!dom.siteMenu || !cfg || !cfg.sites) return;
+  dom.siteMenu.innerHTML = "";
 
-  Object.entries(cfg.hospitals).forEach(([key, hospital]) => {
+  Object.entries(cfg.sites).forEach(([key, site]) => {
     const item = document.createElement("div");
-    item.textContent = hospital.name;
-    item.dataset.hospitalKey = key;
+    item.textContent = site.name;
+    item.dataset.siteKey = key;
 
-    item.onclick = () => selectHospital(key);
+    item.onclick = () => selectSite(key);
 
-    hospitalMenu.appendChild(item);
+    dom.siteMenu.appendChild(item);
   });
 }
 
-/* ------------------------------
-   7. BUILD LOCATION MENU
-   ------------------------------ */
+function buildLocationMenu(siteKey) {
+  if (!dom.locationMenu || !cfg || !cfg.sites) return;
+  dom.locationMenu.innerHTML = "";
 
-function buildLocationMenu(hospitalKey) {
-  locationMenu.innerHTML = "";
+  const site = cfg.sites[siteKey];
+  if (!site) return;
 
-  const hospital = cfg.hospitals[hospitalKey];
-  if (!hospital) return;
-
-  hospital.locations.forEach(loc => {
+  site.locations.forEach(loc => {
     const item = document.createElement("div");
     item.textContent = loc.name;
 
@@ -148,12 +231,12 @@ function buildLocationMenu(hospitalKey) {
       item.onclick = () => selectLocation(loc.name);
     }
 
-    locationMenu.appendChild(item);
+    dom.locationMenu.appendChild(item);
   });
 }
 
 /* ------------------------------
-   8. SELECT TOOL
+   6. SELECTION HANDLERS
    ------------------------------ */
 
 function selectTool(toolKey) {
@@ -162,103 +245,116 @@ function selectTool(toolKey) {
   const tool = cfg.tools.find(t => t.key === toolKey);
   if (!tool) return;
 
-  // Refresh is an action, not a view
   if (tool.type === "action") {
     manualRefresh();
     return;
   }
 
-  activeToolLabel.textContent = tool.label;
+  if (dom.activeToolLabel) {
+    dom.activeToolLabel.textContent = tool.label;
+  }
 
-  toolsMenu.querySelectorAll("div").forEach(div => {
-    div.classList.toggle("active", div.dataset.toolKey === toolKey);
-  });
+  if (dom.toolsMenu) {
+    dom.toolsMenu.querySelectorAll("div").forEach(div => {
+      div.classList.toggle("active", div.dataset.toolKey === toolKey);
+    });
+  }
 
   if (toolKey === "tracking") {
-    selectorBar.style.display = "flex";
+    if (dom.selectorRow) dom.selectorRow.style.display = "flex";
+    if (dom.timestamp) dom.timestamp.style.display = "block";
     loadTrackingBoard();
   } else {
-    selectorBar.style.display = "none";
+    if (dom.selectorRow) dom.selectorRow.style.display = "none";
+    if (dom.timestamp) dom.timestamp.style.display = "none";
     loadToolIframe(toolKey);
   }
 }
 
-/* ------------------------------
-   9. SELECT HOSPITAL
-   ------------------------------ */
+function selectSite(siteKey) {
+  currentSiteKey = siteKey;
 
-function selectHospital(hospitalKey) {
-  currentHospitalKey = hospitalKey;
+  const site = cfg.sites[siteKey];
+  if (site && dom.activeSite) {
+    dom.activeSite.textContent = site.name;
+  }
 
-  const hospital = cfg.hospitals[hospitalKey];
-  activeHospital.textContent = hospital.name;
+  buildLocationMenu(siteKey);
 
-  buildLocationMenu(hospitalKey);
-
-  // Default to first enabled location
-  const firstEnabled = hospital.locations.find(l => l.enabled);
+  const firstEnabled = site.locations.find(l => l.enabled);
   if (firstEnabled) selectLocation(firstEnabled.name);
 
   if (currentToolKey === "tracking") loadTrackingBoard();
 }
 
-/* ------------------------------
-   10. SELECT LOCATION
-   ------------------------------ */
-
 function selectLocation(locationName) {
   currentLocationName = locationName;
-  activeLocation.textContent = locationName;
+
+  if (dom.activeLocation) {
+    dom.activeLocation.textContent = locationName;
+  }
 
   if (currentToolKey === "tracking") loadTrackingBoard();
 }
 
 /* ------------------------------
-   11. LOAD TRACKING BOARD
+   7. IFRAME LOADING
    ------------------------------ */
 
 function loadTrackingBoard() {
-  if (!currentHospitalKey || !currentLocationName) return;
+  if (!currentSiteKey || !currentLocationName) return;
+  if (!cfg || !cfg.dashboards) return;
 
-  const url = cfg.dashboards[currentHospitalKey][currentLocationName];
+  const siteDashboards = cfg.dashboards[currentSiteKey];
+  if (!siteDashboards) return;
+
+  const url = siteDashboards[currentLocationName];
+  if (!url) return;
+
   loadIframe(url, true);
 }
 
-/* ------------------------------
-   12. LOAD OTHER TOOLS
-   ------------------------------ */
-
 function loadToolIframe(toolKey) {
+  if (!cfg || !cfg.toolUrls) return;
   const url = cfg.toolUrls[toolKey];
+  if (!url) return;
   loadIframe(url, false);
 }
 
-/* ------------------------------
-   13. IFRAME LOADING + TIMESTAMP
-   ------------------------------ */
-
 function loadIframe(url, isTracking) {
-  loadingSpinner.style.display = "block";
+  if (!dom.iframe || !url) return;
 
-  iframe.classList.toggle("iframeTracking", isTracking);
-  iframe.classList.toggle("iframeForm", !isTracking);
+  if (dom.loadingSpinner) {
+    dom.loadingSpinner.style.display = "block";
+  }
 
-  iframe.src = `${url}?t=${Date.now()}`;
+  dom.iframe.classList.toggle("iframeTracking", !!isTracking);
+  dom.iframe.classList.toggle("iframeForm", !isTracking);
 
-  iframe.onload = () => {
-    loadingSpinner.style.display = "none";
+  dom.iframe.src = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+
+  dom.iframe.onload = () => {
+    if (dom.loadingSpinner) {
+      dom.loadingSpinner.style.display = "none";
+    }
     updateTimestamp();
   };
 }
 
 function updateTimestamp() {
-  timestamp.textContent =
+  if (!dom.timestamp) return;
+  if (currentToolKey !== "tracking") return;
+
+  dom.timestamp.textContent =
     "Last refreshed at " +
-    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
 }
 
 /* ------------------------------
-   14. AUTO REFRESH (TRACKING ONLY)
+   8. AUTO + MANUAL REFRESH
    ------------------------------ */
 
 setInterval(() => {
@@ -266,59 +362,61 @@ setInterval(() => {
   loadTrackingBoard();
 }, 300000);
 
-/* ------------------------------
-   15. MANUAL REFRESH
-   ------------------------------ */
-
 function manualRefresh() {
   if (currentToolKey !== "tracking") return;
+  if (!dom.activeToolLabel) return;
 
-  activeToolLabel.classList.add("refreshing");
-  activeToolLabel.textContent = "Refreshing…";
+  dom.activeToolLabel.classList.add("refreshing");
+  dom.activeToolLabel.textContent = "Refreshing…";
 
   loadTrackingBoard();
 
   setTimeout(() => {
-    activeToolLabel.classList.remove("refreshing");
-    activeToolLabel.textContent = "Tracking Board";
+    dom.activeToolLabel.classList.remove("refreshing");
+    dom.activeToolLabel.textContent = "Tracking Board";
   }, 800);
 }
 
 /* ------------------------------
-   16. MOBILE VERSION
+   9. MOBILE VERSION
    ------------------------------ */
 
 function buildMobileMenu() {
   const menu = document.getElementById("mobileMenu");
+  if (!menu || !cfg || !cfg.tools) return;
+
   menu.innerHTML = "";
 
   cfg.tools.forEach(tool => {
     if (!tool.enabled) return;
 
     const btn = document.createElement("button");
-    btn.className = "hospitalButton";
+    btn.className = "siteButton";
     btn.textContent = tool.label;
 
     btn.onclick = () => {
-      window.location.href = cfg.toolUrls[tool.key];
+      const url = cfg.toolUrls[tool.key];
+      if (url) window.location.href = url;
     };
 
     menu.appendChild(btn);
   });
 }
 
-function buildMobileHospitalSelector() {
-  const container = document.getElementById("hospitalSelector");
-  container.innerHTML = "<h2>Select Hospital</h2>";
+function buildMobileSiteSelector() {
+  const container = document.getElementById("siteSelector");
+  if (!container || !cfg || !cfg.sites || !cfg.dashboards) return;
 
-  Object.entries(cfg.hospitals).forEach(([key, hospital]) => {
+  container.innerHTML = "<h2>Select Site</h2>";
+
+  Object.entries(cfg.sites).forEach(([key, site]) => {
     const btn = document.createElement("button");
-    btn.className = "hospitalButton";
-    btn.textContent = hospital.name;
+    btn.className = "siteButton";
+    btn.textContent = site.name;
 
     btn.onclick = () => {
       const url = cfg.dashboards[key]["Whole Dept"];
-      window.location.href = url;
+      if (url) window.location.href = url;
     };
 
     container.appendChild(btn);
@@ -329,17 +427,18 @@ function buildMobileHospitalSelector() {
   back.textContent = "← Back";
   back.onclick = () => {
     container.style.display = "none";
-    document.getElementById("mobileMenu").style.display = "block";
+    const menu = document.getElementById("mobileMenu");
+    if (menu) menu.style.display = "block";
   };
 
   container.appendChild(back);
 }
 
 /* ------------------------------
-   17. DROPDOWN ENGINE (UNCHANGED)
+   10. DROPDOWN ENGINE
    ------------------------------ */
 
-document.addEventListener("DOMContentLoaded", () => {
+function bindDropdowns() {
   const triggers = document.querySelectorAll(".dropdownTrigger");
 
   triggers.forEach(trigger => {
@@ -360,22 +459,25 @@ document.addEventListener("DOMContentLoaded", () => {
       menu.classList.remove("open");
     });
   });
-});
+}
 
 /* ------------------------------
-   18. INITIALISE EVERYTHING
+   11. INIT
    ------------------------------ */
 
-window.addEventListener("DOMContentLoaded", () => {
-  footerAuthor.textContent = cfg.trust.name;
+function initApp() {
+  bindDom();
+  applyOrgMetadata();
+  applyBranding();
+  applyMobileMode();
 
   buildToolsMenu();
-  buildHospitalMenu();
+  buildSiteMenu();
+  bindDropdowns();
 
-  // Default hospital = first in config
-  const firstHospitalKey = Object.keys(cfg.hospitals)[0];
-  selectHospital(firstHospitalKey);
-
-  // Default tool = tracking
+  const firstSiteKey = Object.keys(cfg.sites)[0];
+  selectSite(firstSiteKey);
   selectTool("tracking");
-});
+}
+
+document.addEventListener("DOMContentLoaded", initApp);

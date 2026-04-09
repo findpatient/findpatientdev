@@ -1,17 +1,27 @@
 /* =========================================================
-   NHS DOWNTIME TRACKING TOOL — CLEAN, FIXED, RESPONSIVE CSS
+   FINDPATIENT — CLEAN, BRAND-FIRST, RESPONSIVE UI
    ========================================================= */
 
 /* ------------------------------
-   1. NHS COLOUR VARIABLES
+   1. BRAND COLOUR VARIABLES
    ------------------------------ */
 :root {
-  --nhs-blue: #005eb8;
-  --nhs-dark-blue: #003087;
-  --nhs-grey-light: #e8edee;
-  --nhs-grey-mid: #d9dfe5;
-  --nhs-grey-divider: #d0d0d0;
+  --primary-colour: #005eb8;
+  --secondary-colour: #003087;
+  --accent-colour: #41b6e6;
+  --accent-colour-light: color-mix(in srgb, var(--accent-colour) 15%, white);
+  --background-colour: #ffffff;
+  --danger-colour: #d4351c;
+  --success-colour: #00703c;
+
+  --grey-light: #e8edee;
+  --grey-mid: #d9dfe5;
+  --grey-divider: #d0d0d0;
   --text-dark: #333;
+
+  --footer-background: #37393c;
+  --footer-text: #eaeaeb;
+  --timestamp-colour: #666;
 }
 
 /* ------------------------------
@@ -21,13 +31,10 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow-x: hidden;
   font-family: "Segoe UI", Arial, sans-serif;
-  background: #ffffff;
-  text-align: center;
+  background: var(--background-colour);
 }
 
-/* Critical fix: footer anchored + iframe fills space */
 body {
   display: flex;
   flex-direction: column;
@@ -35,49 +42,72 @@ body {
 }
 
 /* ------------------------------
-   3. NHS HEADER BAR
+   3. NHS HEADER (Option A)
    ------------------------------ */
-#nhsHeader {
-  background: var(--nhs-blue);
-  color: white;
+#appHeader {
+  background: var(--primary-colour);
+  color: var(--background-colour);
   padding: 12px 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  position: relative;
 }
 
-#nhsHeaderLeft img {
+#appLogoWrapper {
+  display: flex;
+  align-items: center;
   height: 40px;
 }
 
-#nhsHeaderCenter {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+#appLogo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  display: none; /* hidden until loaded */
+}
+
+#appLogoFallback {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--background-colour); /* always readable */
+  display: none;
+}
+
+#appHeaderLeft {
+  display: flex;
+  align-items: center;
+  min-width: 60px;
+}
+
+#appHeaderLeft img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+#appHeaderCenter {
+  flex: 1;
+  text-align: center;
   font-size: 24px;
   font-weight: 600;
-  pointer-events: none;
 }
 
-#nhsHeaderRight {
+#appHeaderRight {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
 }
 
-/* Mobile header layout */
+/* Mobile header title */
 #mobileHeaderTitle {
   display: none;
   font-size: 24px;
   font-weight: 600;
   margin: 12px 0;
-  color: var(--nhs-dark-blue);
+  color: var(--secondary-colour);
 }
 
 @media (max-width: 600px) {
-  #nhsHeaderCenter { display: none; }
+  #appHeaderCenter { display: none; }
   #mobileHeaderTitle { display: block; }
 }
 
@@ -87,53 +117,44 @@ body {
 button,
 input[type="button"],
 input[type="submit"],
-.hospitalButton {
-  border: none !important;
-  outline: none !important;
-  -webkit-appearance: none;
+.selectorButton,
+.menuButton {
+  border: none;
+  outline: none;
+  background: none;
   appearance: none;
-  background-clip: padding-box;
 }
 
 /* ------------------------------
-   5. DESKTOP BUTTONS + MENUS
+   5. TOOLS MENU BUTTON
    ------------------------------ */
 .menuButton {
-  background: var(--nhs-grey-light);
-  color: var(--nhs-dark-blue);
+  background: var(--grey-light);
+  color: var(--secondary-colour);
   padding: 6px 14px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  position: relative;
   white-space: nowrap;
-  width: 110px;
-  justify-content: center;
 }
 
-.menuButton:not(.activeButton):hover {
-  background: var(--nhs-grey-mid) !important;
+.menuButton:hover {
+  background: var(--grey-mid);
 }
 
-.menuButton.activeButton {
-  background: var(--nhs-grey-mid) !important;
-  color: var(--nhs-dark-blue) !important;
-}
-
-.menuButton span,
-.selectorButton span {
-  font-weight: 600;
-  color: var(--nhs-dark-blue);
+/* Right-aligned dropdown */
+#toolsButton .dropdownMenu {
+  left: auto;
+  right: 0;
 }
 
 /* ------------------------------
-   6. DROPDOWN MENUS (FIXED)
+   6. DROPDOWN MENUS
    ------------------------------ */
 .dropdownTrigger {
   position: relative;
-  overflow: visible;
 }
 
 .dropdownMenu {
@@ -141,40 +162,22 @@ input[type="submit"],
   position: absolute;
   top: 42px;
   left: 0;
-  background: white;
-  color: var(--text-dark);
+  background: var(--background-colour);
   border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-
-  /* Fix: width auto-expands to longest item */
-  width: max-content !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   min-width: 160px;
-  max-width: none;
-  white-space: nowrap;
-
   z-index: 10;
 }
 
 .dropdownMenu div {
   padding: 10px 14px;
-  border-left: 3px solid transparent;
   cursor: pointer;
-
-  /* Fix: left-align menu items */
-  text-align: left;
+  border-left: 3px solid transparent;
 }
 
 .dropdownMenu div:hover {
-  background: #e6f0fa;
-  border-left: 3px solid var(--nhs-blue);
-}
-
-.dropdownDivider {
-  border: none;
-  height: 1px;
-  background: var(--nhs-grey-divider);
-  width: 80%;
-  margin: 6px auto;
+  background: var(--accent-colour-light);
+  border-left: 3px solid var(--primary-colour);
 }
 
 .dropdownList.open {
@@ -182,95 +185,76 @@ input[type="submit"],
 }
 
 .dropdownList div.active {
-  background: #e6f0fa !important;
-  border-left: 3px solid var(--nhs-blue) !important;
+  background: var(--accent-colour-light);
+  border-left: 3px solid var(--primary-colour);
   font-weight: 600;
 }
 
-.noSelect {
-  pointer-events: auto;
-}
-
-.noSelect.active,
-.noSelect.selectedItem {
-  background: white !important;
-  color: var(--text-dark) !important;
-  font-weight: normal !important;
-  border-left: 3px solid transparent !important;
-}
-
-/* Fix: Tools menu opens leftwards (because it's on the right) */
-#toolsButton .dropdownMenu {
-  left: auto;
-  right: 0;
-}
-
 /* ------------------------------
-   7. SELECTOR BAR
+   7. SELECTOR ROW (NEW)
    ------------------------------ */
+#selectorRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 30px;
+  background: var(--background-colour);
+  border-bottom: 1px solid var(--grey-divider);
+}
+
 #selectorBar {
   display: flex;
   gap: 8px;
-  padding: 12px 30px;
-  justify-content: flex-start;
 }
 
 .selectorButton {
-  background: var(--nhs-grey-light);
-  color: var(--nhs-dark-blue);
+  background: var(--grey-light);
+  color: var(--secondary-colour);
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  position: relative;
 }
 
-.selectorButton.activeButton,
-.selectorButton:not(.activeButton):hover {
-  background: var(--nhs-grey-mid) !important;
+.selectorButton:hover {
+  background: var(--grey-mid);
+}
+
+/* Timestamp on selector row */
+#timestamp {
+  font-size: 13px;
+  color: var(--timestamp-colour);
+  white-space: nowrap;
 }
 
 /* ------------------------------
-   8. TIMESTAMP + LOADING SPINNER
+   8. LOADING SPINNER
    ------------------------------ */
-#timestamp {
-  font-size: 13px;
-  color: #e6e6e6;
-}
-
 #loadingSpinner {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 20px;
-  color: var(--nhs-blue);
+  color: var(--primary-colour);
   display: none;
 }
 
 /* ------------------------------
-   9. IFRAMES (FLEX-BASED FIX)
+   9. IFRAMES
    ------------------------------ */
-iframe,
-.iframeTracking {
-  flex: 1 1 auto;       /* Fill remaining vertical space */
-  width: 100%;
-  max-width: 100%;
-  border: none;
-  box-sizing: border-box;
-  min-height: 0;        /* Prevent flex overflow */
+#pageContent {
+  flex: 1;
+  display: flex;
 }
 
-.iframeForm {
+iframe {
+  flex: 1;
   width: 100%;
-  max-width: 100%;
-  height: 1250px;
   border: none;
-  overflow-x: hidden !important;
+  min-height: 0;
 }
 
 /* ------------------------------
@@ -281,65 +265,47 @@ iframe,
   text-align: center;
 }
 
-.hospitalButton {
+.siteButton {
   width: 90%;
   margin: 14px auto;
   padding: 16px;
-  background: var(--nhs-grey-light);
-  color: var(--nhs-dark-blue);
+  background: var(--grey-light);
+  color: var(--secondary-colour);
   font-size: 18px;
   border-radius: 6px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
 }
 
 .backLink {
   margin-top: 20px;
-  display: inline-block;
-  color: var(--nhs-blue);
+  color: var(--primary-colour);
   font-size: 18px;
   cursor: pointer;
 }
 
 /* ------------------------------
-   11. FOOTER (VERSION FIX)
+   11. FOOTER
    ------------------------------ */
 #appFooter {
-  background: #37393c;
-  color: #eaeaeb;
+  background: var(--footer-background);
+  color: var(--footer-text);
   padding: 8px 16px;
   font-size: 0.72rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto; /* Anchors footer */
-}
-
-#footerLeft {
-  flex: 0 0 auto;
-}
-
-#appVersion {
-  opacity: 0.45;
-  font-size: 0.65rem;
-  margin-left: 4px;
+  margin-top: auto;
 }
 
 #footerRight {
   display: flex;
   align-items: center;
   gap: 6px;
-  justify-content: flex-end;
 }
 
 .footerBrand {
   font-weight: 700;
   font-size: 0.78rem;
-  letter-spacing: -0.2px;
-  opacity: 0.95;
 }
 
 .footerDivider {
@@ -349,6 +315,46 @@ iframe,
 .footerCopy,
 .footerName {
   opacity: 0.8;
-  font-weight: 400;
-  font-size: 0.72rem;
+}
+
+/* =========================================================
+   BULLETPROOF NHS LAYOUT — FINAL VERSION
+   ========================================================= */
+
+/* Body is a vertical stack */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header + selector row + footer are fixed height */
+#appHeader,
+#selectorRow,
+#appFooter {
+  flex: 0 0 auto;
+}
+
+/* Main content grows to fill remaining space */
+#mainContent {
+  flex: 1 1 auto;
+  min-height: 0;           /* critical */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;        /* prevents SharePoint forcing scrollbars */
+}
+
+/* Iframe fills mainContent */
+#dashboardFrame {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  border: none;
+  min-height: 0;           /* critical */
 }

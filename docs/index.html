@@ -1,43 +1,54 @@
-<!doctype html> 
+<!doctype html>
 <html>
   <head>
     <title id="dynamicTitle">Loading…</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="style.css" />
+
+    <!-- Dynamic favicon -->
+    <link id="dynamicFavicon" rel="icon" href="">
   </head>
 
-  <body>
-    <!-- NHS HEADER -->
-    <div id="nhsHeader">
-      <div id="nhsHeaderLeft">
-        <img src="https://assets.nhs.uk/images/nhs-logo.png" alt="NHS Logo" />
+  <body id="app-root">
+    <!-- ============================
+         NHS HEADER (Option A)
+         ============================ -->
+    <div id="appHeader">
+      <div id="appHeaderLeft">
+        <div id="appLogoWrapper">
+  <img id="appLogo" alt="" />
+  <span id="appLogoFallback"></span>
+</div>
+
+
       </div>
 
-      <div id="nhsHeaderCenter" class="appTitle">Loading…</div>
+      <div id="appHeaderCenter" class="appTitle">Loading…</div>
 
-      <div id="nhsHeaderRight">
+      <div id="appHeaderRight">
         <div id="toolsButton" class="menuButton dropdownTrigger">
           <span id="activeToolLabel">Loading…</span>
           <div id="toolsMenu" class="dropdownMenu dropdownList"></div>
         </div>
-
-        <div id="timestamp"></div>
       </div>
     </div>
 
+    <!-- Mobile title -->
     <div id="mobileHeaderTitle" class="appTitle">Loading…</div>
 
-    <!-- DESKTOP VERSION -->
-    <div id="desktopContainer">
+    <!-- ============================
+         SELECTOR ROW (NEW)
+         ============================ -->
+    <div id="selectorRow">
       <div id="selectorBar">
-        <div id="hospitalButton" class="selectorButton dropdownTrigger">
+        <div id="siteButton" class="selectorButton dropdownTrigger">
           <svg width="16" height="16" fill="#003087" viewBox="0 0 24 24">
             <path
               d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5c-1.4 0-2.5-1.1-2.5-2.5S10.6 6.5 12 6.5s2.5 1.1 2.5 2.5S13.4 11.5 12 11.5z"
             />
           </svg>
-          <span id="activeHospital">Loading…</span>
-          <div id="hospitalMenu" class="dropdownMenu dropdownList"></div>
+          <span id="activeSite">Loading…</span>
+          <div id="siteMenu" class="dropdownMenu dropdownList"></div>
         </div>
 
         <div id="locationButton" class="selectorButton dropdownTrigger">
@@ -46,19 +57,28 @@
         </div>
       </div>
 
-      <div id="loadingSpinner">Loading…</div>
-
-      <div id="pageContent">
-        <iframe id="dashboardFrame" src=""></iframe>
-      </div>
+      <!-- Timestamp now lives here -->
+      <div id="timestamp">Loading…</div>
     </div>
 
-    <!-- MOBILE VERSION -->
+    <!-- ============================
+         DESKTOP CONTENT
+         ============================ -->
+    <div id="mainContent">
+  <iframe id="dashboardFrame" src=""></iframe>
+</div>
+
+    <!-- ============================
+         MOBILE CONTENT
+         ============================ -->
     <div id="mobileContainer">
       <div id="mobileMenu"></div>
-      <div id="hospitalSelector" style="display: none"></div>
+      <div id="siteSelector" style="display: none"></div>
     </div>
 
+    <!-- ============================
+         FOOTER
+         ============================ -->
     <footer id="appFooter">
       <div id="footerLeft">
         <span id="appVersion"></span>
@@ -74,8 +94,9 @@
 
     <!-- CONFIG FIRST -->
     <script src="config.js"></script>
+    <script src="config.override.js"></script>
 
     <!-- MAIN SCRIPT -->
-    <script src="script.js?v=999"></script>
+    <script src="script.js?v=1"></script>
   </body>
 </html>
